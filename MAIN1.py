@@ -42,7 +42,7 @@ def get_current_sid():
 def authenticate():
     url = "https://raw.githubusercontent.com/OCTANE-XD/ZENITHCONT/main/sids.txt"
     try:
-        valid_sids = requests.get(url).text.splitlines()
+        valid_sids = [line.strip() for line in requests.get(url).text.splitlines() if line.strip()]
     except Exception as e:
         print("[-] Failed to fetch SID list from GitHub:", e)
         exit(1)
