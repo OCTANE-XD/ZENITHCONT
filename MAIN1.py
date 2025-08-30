@@ -42,13 +42,15 @@ def get_current_sid():
 def authenticate():
     url = "https://raw.githubusercontent.com/OCTANE-XD/ZENITHCONT/main/sids.txt"
     try:
-        valid_sids = [line.strip() for line in requests.get(url).text.splitlines() if line.strip()]
+        raw_lines = requests.get(url).text.splitlines()
+        # Keep only the first "word" (SID), ignore blank lines
+        valid_sids = [line.strip().split()[0] for line in raw_lines if line.strip()]
     except Exception as e:
         print("[-] Failed to fetch SID list from GitHub:", e)
         exit(1)
 
     current_sid = get_current_sid()
-    print(f"[!] Your SID: {current_sid}")
+    print(f"[!] Your SID: {current_sid}")  # Debug line
 
     if current_sid not in valid_sids:
         print("[-] Authentication failed! Your SID is not authorized.")
