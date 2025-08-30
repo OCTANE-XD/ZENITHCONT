@@ -8,6 +8,8 @@ import threading
 from colorama import Fore, init
 import random
 import sys
+import subprocess
+import requests  # for fetching allowed SIDs
 
 try:
     import pywinusb.hid as hid
@@ -26,6 +28,33 @@ normal_sensitivity = 1.0
 boosted_sensitivity = 1.5  # Sensitivity boost factor
 
 init(autoreset=True)
+
+# --------- AUTHENTICATION ----------
+def get_current_sid():
+    try:
+        # Get current user's SID via whoami
+        sid = subprocess.check_output("whoami /user", shell=True, text=True).split()[-1]
+        return sid.strip()
+    except Exception as e:
+        print("[-] Failed to get SID:", e)
+        exit(1)
+
+def authenticate():
+    url = "https://raw.githubusercontent.com/OCTANE-XD/ZENITHCONT/main/sids.txt"
+    try:
+        valid_sids = requests.get(url).text.splitlines()
+    except Exception as e:
+        print("[-] Failed to fetch SID list from GitHub:", e)
+        exit(1)
+
+    current_sid = get_current_sid()
+    print(f"[!] Your SID: {current_sid}")
+
+    if current_sid not in valid_sids:
+        print("[-] Authentication failed! Your SID is not authorized.")
+        exit(1)
+    else:
+        print("[+] Authentication successful! Welcome to ZENITH CONTROL.")
 
 # --------- UTILITIES ----------
 def clear():
@@ -261,6 +290,7 @@ def menu():
 
 # --------- START THREADS + MENU ----------
 if __name__ == "__main__":
+    authenticate()   # 🔹 SID check first
     auto_connect()
     threading.Thread(target=drag_assist_loop, daemon=True).start()
     threading.Thread(target=force_smoothness_loop, daemon=True).start()
